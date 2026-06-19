@@ -1,0 +1,14 @@
+# zig
+zig-out/
+.zig-cache/
+
+# venv
+.nix-chroot/
+
+# configs
+*.yaml
+*.yml
+!*.example.yml
+
+# session/editor info
+*.vim
