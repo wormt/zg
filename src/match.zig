@@ -11,39 +11,20 @@ const MatchError = error{
     NoExpression,
 };
 
+// the character classes we recognise; anything else falls through to a literal match
+const Class = enum { @"\\d", @"\\D", @"\\w", @"\\W", @"\\s" };
+
 pub fn match(input: []const u8, expr: []const u8) MatchError!bool {
     if (expr.len > 0) {
-        if (std.mem.eql(u8, expr, "\\d")) {
-            // if expression is numeric
-            const found = std.mem.indexOfAny(u8, input, num) != null;
-            if (found) std.debug.print("{s}\n", .{input});
-            return found;
-        } else if (std.mem.eql(u8, expr, "\\D")) {
-            // if expression isn't numeric
-            const found = std.mem.indexOfAny(u8, input, num) == null;
-            if (found) std.debug.print("{s}\n", .{input});
-            return found;
-        } else if (std.mem.eql(u8, expr, "\\w")) {
-            // if expression is alphanumeric
-            const found = std.mem.indexOfAny(u8, input, num ++ lower ++ upper) != null;
-            if (found) std.debug.print("{s}\n", .{input});
-            return found;
-        } else if (std.mem.eql(u8, expr, "\\W")) {
-            // if expression isn't alphanumeric
-            const found = std.mem.indexOfAny(u8, input, num ++ lower ++ upper) == null;
-            if (found) std.debug.print("{s}\n", .{input});
-            return found;
-        } else if (std.mem.eql(u8, expr, "\\s")) {
-            // if expression is a space, tab, newline, carriage return
-            const found = std.mem.indexOfAny(u8, input, space) != null;
-            if (found) std.debug.print("{s}\n", .{input});
-            return found;
-        } else {
-            // if exact match
-            const found = std.mem.indexOf(u8, input, expr) != null;
-            if (found) std.debug.print("{s}\n", .{input});
-            return found;
-        }
+        const found = if (std.meta.stringToEnum(Class, expr)) |class| switch (class) {
+            .@"\\d" => std.mem.indexOfAny(u8, input, num) != null, // if expression is numeric
+            .@"\\D" => std.mem.indexOfAny(u8, input, num) == null, // if expression isn't numeric
+            .@"\\w" => std.mem.indexOfAny(u8, input, num ++ lower ++ upper) != null, // if expression is alphanumeric
+            .@"\\W" => std.mem.indexOfAny(u8, input, num ++ lower ++ upper) == null, // if expression isn't alphanumeric
+            .@"\\s" => std.mem.indexOfAny(u8, input, space) != null, // if expression is a space, tab, newline, carriage return
+        } else std.mem.indexOf(u8, input, expr) != null; // if exact match
+        if (found) std.debug.print("{s}\n", .{input});
+        return found;
     } else {
         return MatchError.NoExpression;
     }
