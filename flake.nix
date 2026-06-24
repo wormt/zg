@@ -22,9 +22,6 @@
           zig.packages.${system}.zig_0_16_0
           zls.packages.${system}.zls
         ];
-        shellHook = ''
-          nu
-        '';
       };
     });
   };
